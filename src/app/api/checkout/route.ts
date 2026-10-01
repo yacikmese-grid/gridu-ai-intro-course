@@ -50,8 +50,7 @@ export async function POST(request: Request): Promise<Response> {
 
     if (
       typeof quantity !== "number" ||
-      !Number.isFinite(quantity) ||
-      !Number.isInteger(quantity) ||
+      !Number.isSafeInteger(quantity) ||
       quantity <= 0
     ) {
       return error("Each quantity must be a positive integer.");

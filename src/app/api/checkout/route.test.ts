@@ -28,6 +28,19 @@ describe("POST /api/checkout", () => {
     await expect(response.json()).resolves.toEqual({ total: 25 });
   });
 
+  it("sums the required multi-item cart to 43", async () => {
+    const response = await POST(request({
+      userId: "guest",
+      items: [
+        { productId: "prod-001", quantity: 2 },
+        { productId: "prod-002", quantity: 1 },
+      ],
+    }));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ total: 43 });
+  });
+
   it("supports multiple items", async () => {
     const response = await POST(request({
       userId: "guest",
@@ -53,6 +66,10 @@ describe("POST /api/checkout", () => {
     ["negative quantity", { userId: "guest", items: [{ productId: "prod-001", quantity: -1 }] }],
     ["fractional quantity", { userId: "guest", items: [{ productId: "prod-001", quantity: 1.5 }] }],
     ["string quantity", { userId: "guest", items: [{ productId: "prod-001", quantity: "1" }] }],
+    ["numeric-string quantity", { userId: "guest", items: [{ productId: "prod-001", quantity: "2" }] }],
+    ["oversized quantity", { userId: "guest", items: [{ productId: "prod-001", quantity: 1e308 }] }],
+    ["non-string userId", { userId: 5, items: [{ productId: "prod-001", quantity: 1 }] }],
+    ["items as object", { userId: "guest", items: { productId: "prod-001", quantity: 1 } }],
   ])("rejects %s", async (_label, body) => {
     await expectBadRequest(body);
   });
